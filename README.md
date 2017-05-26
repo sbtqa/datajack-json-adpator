@@ -1,5 +1,5 @@
 # datajack-json-adaptor
-[![Build Status](https://travis-ci.org/sbtqa/datajack-json-adaptor.svg?branch=master)](https://travis-ci.org/sbtqa/datajack-json-adaptor) [![GitHub release](https://img.shields.io/github/release/sbtqa/datajack-json-adaptor.svg?style=flat-square)](https://github.com/sbtqa/datajack-json-adaptor/releases) [![Maven Central](https://img.shields.io/maven-central/v/ru.sbtqa.tag/swing-back.svg)](https://mvnrepository.com/artifact/ru.sbtqa.tag/datajack-json-adaptor)
+[![Build Status](https://travis-ci.org/sbtqa/datajack-json-adaptor.svg?branch=master)](https://travis-ci.org/sbtqa/datajack-json-adaptor) [![GitHub release](https://img.shields.io/github/release/sbtqa/datajack-json-adaptor.svg?style=flat-square)](https://github.com/sbtqa/datajack-json-adaptor/releases)  
 
 Datajack-json-adaptor is the realization of [DataJack](https://github.com/sbtqa/datajack). Implement support for JSON.
 
