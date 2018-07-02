@@ -61,7 +61,7 @@
         "floatValue": 42.1,
         "doubleValue": 42.01,
         "nestedObjectValue": {
-            "innerValue": "Tis is string from nested object"
+            "innerValue": "This is string from nested object"
         }
     }
 }
