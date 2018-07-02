@@ -34,13 +34,8 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
      * @throws DataException if file not found in testDataFolder
      */
     public JsonDataObjectAdaptor(String testDataFolder, String collectionName) throws DataException {
-        String json;
-        try {
-            json = readFileToString(new File(testDataFolder + separator + collectionName + ".json"), "UTF-8");
-        } catch (IOException ex) {
-            throw new CollectionNotfoundException(String.format("File %s.json not found in %s",
-                    collectionName, testDataFolder), ex);
-        }
+        String json = readFile(testDataFolder, collectionName);
+
         BasicDBObject parsed = parse(json);
         this.testDataFolder = testDataFolder;
         this.basicObj = parsed;
@@ -62,16 +57,11 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
 
     @Override
     public JsonDataObjectAdaptor fromCollection(String collName) throws DataException {
-        try {
-            String json = readFileToString(new File(this.testDataFolder + separator + collName + ".json"), "UTF-8");
+            String json = readFile(this.testDataFolder, collName);
             BasicDBObject parsed = parse(json);
             JsonDataObjectAdaptor newObj = new JsonDataObjectAdaptor(this.testDataFolder, parsed, collName);
             newObj.applyGenerator(this.callback);
             return newObj;
-        } catch (IOException ex) {
-            throw new CyclicReferencesExeption("There is no file with " + collName + ".json name", ex);
-        }
-
     }
 
     @Override
@@ -194,5 +184,16 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
     @Override
     public void applyGenerator(Class<? extends GeneratorCallback> callback) {
         this.callback = callback;
+    }
+
+    protected String readFile(String testDataFolder, String collectionName) throws CollectionNotfoundException {
+        String json;
+        try {
+            json = readFileToString(new File(testDataFolder + separator + collectionName + ".json"), "UTF-8");
+        } catch (IOException ex) {
+            throw new CollectionNotfoundException(String.format("File %s.json not found in %s",
+                    collectionName, testDataFolder), ex);
+        }
+        return json;
     }
 }
