@@ -51,6 +51,14 @@ public class JsonDataTest {
   }
   
   @Test
+  public void arrayTest() throws DataException {
+    String collectionName = "Tests";
+    TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collectionName);
+    assertEquals("a",
+            tdo.get("array[1].a").getValue());
+  }
+  
+  @Test
   public void getReferenceTest() throws DataException {
     String collectionName = "DataBlocks";
     TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collectionName);

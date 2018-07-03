@@ -135,25 +135,7 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
         JsonDataObjectAdaptor tdo;
 
         if (key.contains(".")) {
-            String[] keys = key.split("[.]");
-            StringBuilder partialBuilt = new StringBuilder();
-            BasicDBObject basicO = this.basicObj;
-            for (String partialKey : keys) {
-                partialBuilt.append(partialKey);
-                if (!(basicO.get(partialKey) instanceof BasicDBObject)) {
-                    if (null == basicO.get(partialKey)) {
-                        throw new FieldNotFoundException(format("Collection \"%s\" doesn't contain \"%s\" field on path \"%s\"",
-                                this.collectionName, partialKey, partialBuilt.toString()));
-                    }
-                    break;
-                }
-                basicO = (BasicDBObject) basicO.get(partialKey);
-                partialBuilt.append(".");
-            }
-            tdo = privateInit(this.testDataFolder, basicO, this.collectionName, this.way);
-            tdo.applyGenerator(this.callback);
-            tdo.setRootObj(this.rootObj, this.collectionName + "." + key);
-            return tdo;
+            return parseComplex(key);
         }
         if (!basicObj.containsField(key)) {
             throw new FieldNotFoundException(format("Collection \"%s\" doesn't contain \"%s\" field in path \"%s\"",
@@ -173,6 +155,28 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
             rootObjValue = this.collectionName + "." + key;
         }
         tdo.setRootObj(this.rootObj, rootObjValue);
+        return tdo;
+    }
+
+    private TestDataObject parseComplex(String key) throws FieldNotFoundException {
+        String[] keys = key.split("[.]");
+        StringBuilder partialBuilt = new StringBuilder();
+        BasicDBObject basicO = this.basicObj;
+        for (String partialKey : keys) {
+            partialBuilt.append(partialKey);
+            if (!(basicO.get(partialKey) instanceof BasicDBObject)) {
+                if (null == basicO.get(partialKey)) {
+                    throw new FieldNotFoundException(format("Collection \"%s\" doesn't contain \"%s\" field on path \"%s\"",
+                            this.collectionName, partialKey, partialBuilt.toString()));
+                }
+                break;
+            }
+            basicO = (BasicDBObject) basicO.get(partialKey);
+            partialBuilt.append(".");
+        }
+        JsonDataObjectAdaptor tdo = privateInit(this.testDataFolder, basicO, this.collectionName, this.way);
+        tdo.applyGenerator(this.callback);
+        tdo.setRootObj(this.rootObj, this.collectionName + "." + key);
         return tdo;
     }
 

@@ -27,5 +27,18 @@
             "password": 123
         }
     },
-    "comment": "Some comment"
+    "comment": "Some comment",
+    "array": [
+        "a",
+        {
+            "b": 1
+        },
+        {
+            "b": [{
+                    "b": {
+                        "c": 1
+                    }
+                }]
+        }
+    ]
 }
