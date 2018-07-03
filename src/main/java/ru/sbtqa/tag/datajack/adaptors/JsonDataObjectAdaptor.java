@@ -24,6 +24,7 @@ import ru.sbtqa.tag.datajack.exceptions.ReferenceException;
 public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements TestDataObject {
 
     private static final Logger LOG = LoggerFactory.getLogger(JsonDataObjectAdaptor.class);
+    private static final String DEFAULT_EXTENSION = "json";
     protected String collectionName;
     protected String testDataFolder;
     protected String extension;
@@ -36,7 +37,7 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
      * @throws DataException if file not found in testDataFolder
      */
     public JsonDataObjectAdaptor(String testDataFolder, String collectionName) throws DataException {
-        this.extension = "json";
+        this.extension = DEFAULT_EXTENSION;
         String json = readFile(testDataFolder, collectionName);
 
         BasicDBObject parsed = parse(json);
@@ -288,13 +289,11 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
     }
 
     protected String readFile(String testDataFolder, String collectionName) throws CollectionNotfoundException {
-        String json;
         try {
-            json = readFileToString(new File(testDataFolder + separator + collectionName + "." + this.extension), "UTF-8");
+            return readFileToString(new File(testDataFolder + separator + collectionName + "." + this.extension), "UTF-8");
         } catch (IOException ex) {
             throw new CollectionNotfoundException(String.format("File %s.json not found in %s",
                     collectionName, testDataFolder), ex);
         }
-        return json;
     }
 }
