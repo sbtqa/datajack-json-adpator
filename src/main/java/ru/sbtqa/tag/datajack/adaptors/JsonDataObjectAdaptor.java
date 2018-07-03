@@ -23,8 +23,9 @@ import ru.sbtqa.tag.datajack.exceptions.ReferenceException;
 public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements TestDataObject {
 
     private static final Logger LOG = LoggerFactory.getLogger(JsonDataObjectAdaptor.class);
-    private final String collectionName;
-    private final String testDataFolder;
+    protected String collectionName;
+    protected String testDataFolder;
+    protected String extension;
 
     /**
      * Create JsonDataObjectAdaptor instance
@@ -34,44 +35,98 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
      * @throws DataException if file not found in testDataFolder
      */
     public JsonDataObjectAdaptor(String testDataFolder, String collectionName) throws DataException {
-        String json;
-        try {
-            json = readFileToString(new File(testDataFolder + separator + collectionName + ".json"), "UTF-8");
-        } catch (IOException ex) {
-            throw new CollectionNotfoundException(String.format("File %s.json not found in %s",
-                    collectionName, testDataFolder), ex);
-        }
+        this.extension = "json";
+        String json = readFile(testDataFolder, collectionName);
+
         BasicDBObject parsed = parse(json);
         this.testDataFolder = testDataFolder;
         this.basicObj = parsed;
         this.collectionName = collectionName;
     }
 
-    private JsonDataObjectAdaptor(String testDataFolder, BasicDBObject obj, String collectionName) {
+    /**
+     * Create JsonDataObjectAdaptor instance
+     *
+     * @param testDataFolder path to data folder
+     * @param collectionName json file name
+     * @param extension
+     * @throws DataException if file not found in testDataFolder
+     */
+    public JsonDataObjectAdaptor(String testDataFolder, String collectionName, String extension) throws DataException {
+        this.extension = extension;
+
+        String json = readFile(testDataFolder, collectionName);
+
+        BasicDBObject parsed = parse(json);
+        this.testDataFolder = testDataFolder;
+        this.basicObj = parsed;
+        this.collectionName = collectionName;
+    }
+
+    /**
+     * Internal use only for adaptor overriding purposes
+     *
+     * @param testDataFolder
+     * @param obj
+     * @param collectionName
+     */
+    protected JsonDataObjectAdaptor(String testDataFolder, BasicDBObject obj, String collectionName, String extension) {
+        this.extension = extension;
         this.testDataFolder = testDataFolder;
         this.basicObj = obj;
         this.collectionName = collectionName;
     }
 
-    private JsonDataObjectAdaptor(String testDataFolder, BasicDBObject obj, String collectionName, String way) {
+    /**
+     * Internal use only for adaptor overriding purposes
+     *
+     * @param testDataFolder
+     * @param obj
+     * @param collectionName
+     * @param way
+     */
+    protected JsonDataObjectAdaptor(String testDataFolder, BasicDBObject obj, String collectionName, String way, String extension) {
+        this.extension = extension;
         this.testDataFolder = testDataFolder;
         this.basicObj = obj;
         this.way = way;
         this.collectionName = collectionName;
     }
 
+    /**
+     * Internal use only for adaptor overriding purposes
+     *
+     * @param <T>
+     * @param testDataFolder
+     * @param obj
+     * @param collectionName
+     * @param way
+     * @return
+     */
+    protected <T extends JsonDataObjectAdaptor> T privateInit(String testDataFolder, BasicDBObject obj, String collectionName, String way) {
+        return (T) new JsonDataObjectAdaptor(testDataFolder, obj, collectionName, way, extension);
+    }
+
+    /**
+     * Internal use only for adaptor overriding purposes
+     *
+     * @param <T>
+     * @param testDataFolder
+     * @param obj
+     * @param collectionName
+     * @return
+     */
+    protected <T extends JsonDataObjectAdaptor> T privateInit(String testDataFolder, BasicDBObject obj, String collectionName) {
+        return (T) new JsonDataObjectAdaptor(testDataFolder, obj, collectionName, extension);
+    }
+
     @Override
     public JsonDataObjectAdaptor fromCollection(String collName) throws DataException {
-        try {
-            String json = readFileToString(new File(this.testDataFolder + separator + collName + ".json"), "UTF-8");
-            BasicDBObject parsed = parse(json);
-            JsonDataObjectAdaptor newObj = new JsonDataObjectAdaptor(this.testDataFolder, parsed, collName);
-            newObj.applyGenerator(this.callback);
-            return newObj;
-        } catch (IOException ex) {
-            throw new CyclicReferencesExeption("There is no file with " + collName + ".json name", ex);
-        }
-
+        String json = readFile(this.testDataFolder, collName);
+        BasicDBObject parsed = parse(json);
+        JsonDataObjectAdaptor newObj = privateInit(this.testDataFolder, parsed, collName);
+        newObj.applyGenerator(this.callback);
+        return newObj;
     }
 
     @Override
@@ -95,8 +150,7 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
                 basicO = (BasicDBObject) basicO.get(partialKey);
                 partialBuilt.append(".");
             }
-
-            tdo = new JsonDataObjectAdaptor(this.testDataFolder, basicO, this.collectionName, this.way);
+            tdo = privateInit(this.testDataFolder, basicO, this.collectionName, this.way);
             tdo.applyGenerator(this.callback);
             tdo.setRootObj(this.rootObj, this.collectionName + "." + key);
             return tdo;
@@ -109,7 +163,7 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
         if (!(result instanceof BasicDBObject)) {
             result = new BasicDBObject(key, result);
         }
-        tdo = new JsonDataObjectAdaptor(this.testDataFolder, (BasicDBObject) result, this.collectionName, this.way);
+        tdo = privateInit(this.testDataFolder, (BasicDBObject) result, this.collectionName, this.way);
         tdo.applyGenerator(this.callback);
 
         String rootObjValue;
@@ -194,5 +248,16 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
     @Override
     public void applyGenerator(Class<? extends GeneratorCallback> callback) {
         this.callback = callback;
+    }
+
+    protected String readFile(String testDataFolder, String collectionName) throws CollectionNotfoundException {
+        String json;
+        try {
+            json = readFileToString(new File(testDataFolder + separator + collectionName + "." + this.extension), "UTF-8");
+        } catch (IOException ex) {
+            throw new CollectionNotfoundException(String.format("File %s.json not found in %s",
+                    collectionName, testDataFolder), ex);
+        }
+        return json;
     }
 }

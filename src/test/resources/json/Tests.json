@@ -22,7 +22,7 @@
         "Common": {
             "login": {
                 "value": "2login",
-                "comment": "Ну еще один паоль"
+                "comment": "Ну еще один пароль"
             },
             "password": 123
         }
