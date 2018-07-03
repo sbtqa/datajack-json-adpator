@@ -25,6 +25,7 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
     private static final Logger LOG = LoggerFactory.getLogger(JsonDataObjectAdaptor.class);
     protected String collectionName;
     protected String testDataFolder;
+    protected String extension;
 
     /**
      * Create JsonDataObjectAdaptor instance
@@ -34,6 +35,26 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
      * @throws DataException if file not found in testDataFolder
      */
     public JsonDataObjectAdaptor(String testDataFolder, String collectionName) throws DataException {
+        this.extension = "json";
+        String json = readFile(testDataFolder, collectionName);
+
+        BasicDBObject parsed = parse(json);
+        this.testDataFolder = testDataFolder;
+        this.basicObj = parsed;
+        this.collectionName = collectionName;
+    }
+
+    /**
+     * Create JsonDataObjectAdaptor instance
+     *
+     * @param testDataFolder path to data folder
+     * @param collectionName json file name
+     * @param extension
+     * @throws DataException if file not found in testDataFolder
+     */
+    public JsonDataObjectAdaptor(String testDataFolder, String collectionName, String extension) throws DataException {
+        this.extension = extension;
+
         String json = readFile(testDataFolder, collectionName);
 
         BasicDBObject parsed = parse(json);
@@ -49,7 +70,8 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
      * @param obj
      * @param collectionName
      */
-    protected JsonDataObjectAdaptor(String testDataFolder, BasicDBObject obj, String collectionName) {
+    protected JsonDataObjectAdaptor(String testDataFolder, BasicDBObject obj, String collectionName, String extension) {
+        this.extension = extension;
         this.testDataFolder = testDataFolder;
         this.basicObj = obj;
         this.collectionName = collectionName;
@@ -63,7 +85,8 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
      * @param collectionName
      * @param way
      */
-    protected JsonDataObjectAdaptor(String testDataFolder, BasicDBObject obj, String collectionName, String way) {
+    protected JsonDataObjectAdaptor(String testDataFolder, BasicDBObject obj, String collectionName, String way, String extension) {
+        this.extension = extension;
         this.testDataFolder = testDataFolder;
         this.basicObj = obj;
         this.way = way;
@@ -81,7 +104,7 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
      * @return
      */
     protected <T extends JsonDataObjectAdaptor> T privateInit(String testDataFolder, BasicDBObject obj, String collectionName, String way) {
-        return (T) new JsonDataObjectAdaptor(testDataFolder, obj, collectionName, way);
+        return (T) new JsonDataObjectAdaptor(testDataFolder, obj, collectionName, way, extension);
     }
 
     /**
@@ -94,7 +117,7 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
      * @return
      */
     protected <T extends JsonDataObjectAdaptor> T privateInit(String testDataFolder, BasicDBObject obj, String collectionName) {
-        return (T) new JsonDataObjectAdaptor(testDataFolder, obj, collectionName);
+        return (T) new JsonDataObjectAdaptor(testDataFolder, obj, collectionName, extension);
     }
 
     @Override
@@ -230,7 +253,7 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
     protected String readFile(String testDataFolder, String collectionName) throws CollectionNotfoundException {
         String json;
         try {
-            json = readFileToString(new File(testDataFolder + separator + collectionName + ".json"), "UTF-8");
+            json = readFileToString(new File(testDataFolder + separator + collectionName + "." + this.extension), "UTF-8");
         } catch (IOException ex) {
             throw new CollectionNotfoundException(String.format("File %s.json not found in %s",
                     collectionName, testDataFolder), ex);

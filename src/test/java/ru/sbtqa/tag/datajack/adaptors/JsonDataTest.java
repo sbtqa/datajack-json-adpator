@@ -43,6 +43,14 @@ public class JsonDataTest {
   public ExpectedException expectDataExceptions = none();
 
   @Test
+  public void differentExtensionTest() throws DataException {
+    String collectionName = "JsonP";
+    TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collectionName, "jsonp");
+    assertEquals("123qwe",
+            tdo.get("Common.password2").getValue());
+  }
+  
+  @Test
   public void getReferenceTest() throws DataException {
     String collectionName = "DataBlocks";
     TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collectionName);
