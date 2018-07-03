@@ -173,6 +173,7 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
 
             if (isArray(partialKey)) {
                 basicO = (BasicDBObject) parseArray(basicO, partialKey);
+                continue;
             }
 
             if (!(basicO.get(partialKey) instanceof BasicDBObject)) {
@@ -195,8 +196,8 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
         if (!isArray(key)) {
             throw new DataException(String.format("%s.%s is not an array!", this.collectionName, key));
         }
-        String arrayKey = key.split("[")[0];
-        String arrayIndex = key.split("[")[1].split("]")[0];
+        String arrayKey = key.split("\\[")[0];
+        String arrayIndex = key.split("\\[")[1].split("\\]")[0];
         Object listCandidate = basicO.get(arrayKey);
 
         if (!(listCandidate instanceof BasicDBList)) {
