@@ -132,11 +132,11 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
     @Override
     public TestDataObject get(String key) throws DataException {
         this.way = key;
-        JsonDataObjectAdaptor tdo;
+        return key.contains(".") ? parseComplex(key) : parseSimple(key);        
 
-        if (key.contains(".")) {
-            return parseComplex(key);
-        }
+    }
+
+    private TestDataObject parseSimple(String key) throws FieldNotFoundException {
         if (!basicObj.containsField(key)) {
             throw new FieldNotFoundException(format("Collection \"%s\" doesn't contain \"%s\" field in path \"%s\"",
                     this.collectionName, key, this.path));
@@ -145,7 +145,7 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
         if (!(result instanceof BasicDBObject)) {
             result = new BasicDBObject(key, result);
         }
-        tdo = privateInit(this.testDataFolder, (BasicDBObject) result, this.collectionName, this.way);
+        JsonDataObjectAdaptor tdo = privateInit(this.testDataFolder, (BasicDBObject) result, this.collectionName, this.way);
         tdo.applyGenerator(this.callback);
 
         String rootObjValue;
