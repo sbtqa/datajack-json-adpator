@@ -138,16 +138,18 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
     }
 
     private TestDataObject parseSimple(String key) throws FieldNotFoundException, DataException {
-        if (!basicObj.containsField(key)) {
-            throw new FieldNotFoundException(format("Collection \"%s\" doesn't contain \"%s\" field in path \"%s\"",
-                    this.collectionName, key, this.path));
-        }
-        Object result = this.basicObj.get(key);
+        Object result;
 
         if (isArray(key)) {
-            result = (BasicDBObject) parseArray((BasicDBObject) result, key);
-        }
+            result = parseArray(basicObj, key);
+        } else {
 
+            if (!basicObj.containsField(key)) {
+                throw new FieldNotFoundException(format("Collection \"%s\" doesn't contain \"%s\" field in path \"%s\"",
+                        this.collectionName, key, this.path));
+            }
+            result = this.basicObj.get(key);
+        }
         if (!(result instanceof BasicDBObject)) {
             result = new BasicDBObject(key, result);
         }
