@@ -1,5 +1,6 @@
 package ru.sbtqa.tag.datajack.adaptors;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import static com.mongodb.BasicDBObject.parse;
 import java.io.File;
@@ -132,16 +133,21 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
     @Override
     public TestDataObject get(String key) throws DataException {
         this.way = key;
-        return key.contains(".") ? parseComplex(key) : parseSimple(key);        
+        return key.contains(".") ? parseComplex(key) : parseSimple(key);
 
     }
 
-    private TestDataObject parseSimple(String key) throws FieldNotFoundException {
+    private TestDataObject parseSimple(String key) throws FieldNotFoundException, DataException {
         if (!basicObj.containsField(key)) {
             throw new FieldNotFoundException(format("Collection \"%s\" doesn't contain \"%s\" field in path \"%s\"",
                     this.collectionName, key, this.path));
         }
         Object result = this.basicObj.get(key);
+
+        if (isArray(key)) {
+            result = (BasicDBObject) parseArray((BasicDBObject) result, key);
+        }
+
         if (!(result instanceof BasicDBObject)) {
             result = new BasicDBObject(key, result);
         }
@@ -158,12 +164,17 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
         return tdo;
     }
 
-    private TestDataObject parseComplex(String key) throws FieldNotFoundException {
+    private TestDataObject parseComplex(String key) throws FieldNotFoundException, DataException {
         String[] keys = key.split("[.]");
         StringBuilder partialBuilt = new StringBuilder();
         BasicDBObject basicO = this.basicObj;
         for (String partialKey : keys) {
             partialBuilt.append(partialKey);
+
+            if (isArray(partialKey)) {
+                basicO = (BasicDBObject) parseArray(basicO, partialKey);
+            }
+
             if (!(basicO.get(partialKey) instanceof BasicDBObject)) {
                 if (null == basicO.get(partialKey)) {
                     throw new FieldNotFoundException(format("Collection \"%s\" doesn't contain \"%s\" field on path \"%s\"",
@@ -178,6 +189,25 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
         tdo.applyGenerator(this.callback);
         tdo.setRootObj(this.rootObj, this.collectionName + "." + key);
         return tdo;
+    }
+
+    private Object parseArray(BasicDBObject basicO, String key) throws DataException {
+        if (!isArray(key)) {
+            throw new DataException(String.format("%s.%s is not an array!", this.collectionName, key));
+        }
+        String arrayKey = key.split("[")[0];
+        String arrayIndex = key.split("[")[1].split("]")[0];
+        Object listCandidate = basicO.get(arrayKey);
+
+        if (!(listCandidate instanceof BasicDBList)) {
+            throw new DataException(String.format("%s.%s is not an array!", this.collectionName, key));
+        }
+
+        return ((BasicDBList) listCandidate).get(arrayIndex);
+    }
+
+    public static boolean isArray(String key) {
+        return key.matches("(.+\\[\\d+\\])");
     }
 
     @Override
