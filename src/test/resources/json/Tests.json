@@ -39,6 +39,20 @@
                         "c": 1
                     }
                 }]
+        },
+        {
+            "ref": {
+                "value": {
+                    "collection": "DataBlocks",
+                    "path": "Params Group 1.password"
+                }
+            },
+            "genRef": {
+                "value": {
+                    "collection": "DataBlocks",
+                    "path": "Common.gen gen.gendata"
+                }
+            }
         }
     ]
 }
