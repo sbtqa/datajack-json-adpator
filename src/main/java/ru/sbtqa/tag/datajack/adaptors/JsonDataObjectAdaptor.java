@@ -23,8 +23,8 @@ import ru.sbtqa.tag.datajack.exceptions.ReferenceException;
 public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements TestDataObject {
 
     private static final Logger LOG = LoggerFactory.getLogger(JsonDataObjectAdaptor.class);
-    private final String collectionName;
-    private final String testDataFolder;
+    protected String collectionName;
+    protected String testDataFolder;
 
     /**
      * Create JsonDataObjectAdaptor instance
@@ -42,26 +42,68 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
         this.collectionName = collectionName;
     }
 
-    private JsonDataObjectAdaptor(String testDataFolder, BasicDBObject obj, String collectionName) {
+    /**
+     * Internal use only for adaptor overriding purposes
+     *
+     * @param testDataFolder
+     * @param obj
+     * @param collectionName
+     */
+    protected JsonDataObjectAdaptor(String testDataFolder, BasicDBObject obj, String collectionName) {
         this.testDataFolder = testDataFolder;
         this.basicObj = obj;
         this.collectionName = collectionName;
     }
 
-    private JsonDataObjectAdaptor(String testDataFolder, BasicDBObject obj, String collectionName, String way) {
+    /**
+     * Internal use only for adaptor overriding purposes
+     *
+     * @param testDataFolder
+     * @param obj
+     * @param collectionName
+     * @param way
+     */
+    protected JsonDataObjectAdaptor(String testDataFolder, BasicDBObject obj, String collectionName, String way) {
         this.testDataFolder = testDataFolder;
         this.basicObj = obj;
         this.way = way;
         this.collectionName = collectionName;
     }
 
+    /**
+     * Internal use only for adaptor overriding purposes
+     *
+     * @param <T>
+     * @param testDataFolder
+     * @param obj
+     * @param collectionName
+     * @param way
+     * @return
+     */
+    protected <T extends JsonDataObjectAdaptor> T privateInit(String testDataFolder, BasicDBObject obj, String collectionName, String way) {
+        return (T) new JsonDataObjectAdaptor(testDataFolder, obj, collectionName, way);
+    }
+
+    /**
+     * Internal use only for adaptor overriding purposes
+     *
+     * @param <T>
+     * @param testDataFolder
+     * @param obj
+     * @param collectionName
+     * @return
+     */
+    protected <T extends JsonDataObjectAdaptor> T privateInit(String testDataFolder, BasicDBObject obj, String collectionName) {
+        return (T) new JsonDataObjectAdaptor(testDataFolder, obj, collectionName);
+    }
+
     @Override
     public JsonDataObjectAdaptor fromCollection(String collName) throws DataException {
-            String json = readFile(this.testDataFolder, collName);
-            BasicDBObject parsed = parse(json);
-            JsonDataObjectAdaptor newObj = new JsonDataObjectAdaptor(this.testDataFolder, parsed, collName);
-            newObj.applyGenerator(this.callback);
-            return newObj;
+        String json = readFile(this.testDataFolder, collName);
+        BasicDBObject parsed = parse(json);
+        JsonDataObjectAdaptor newObj = privateInit(this.testDataFolder, parsed, collName);
+        newObj.applyGenerator(this.callback);
+        return newObj;
     }
 
     @Override
@@ -85,8 +127,7 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
                 basicO = (BasicDBObject) basicO.get(partialKey);
                 partialBuilt.append(".");
             }
-
-            tdo = new JsonDataObjectAdaptor(this.testDataFolder, basicO, this.collectionName, this.way);
+            tdo = privateInit(this.testDataFolder, basicO, this.collectionName, this.way);
             tdo.applyGenerator(this.callback);
             tdo.setRootObj(this.rootObj, this.collectionName + "." + key);
             return tdo;
@@ -99,7 +140,7 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
         if (!(result instanceof BasicDBObject)) {
             result = new BasicDBObject(key, result);
         }
-        tdo = new JsonDataObjectAdaptor(this.testDataFolder, (BasicDBObject) result, this.collectionName, this.way);
+        tdo = privateInit(this.testDataFolder, (BasicDBObject) result, this.collectionName, this.way);
         tdo.applyGenerator(this.callback);
 
         String rootObjValue;
