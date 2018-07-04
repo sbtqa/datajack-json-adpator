@@ -247,8 +247,8 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
             if (result == null) {
                 if (this.way.contains(".")) {
                     this.way = this.way.split("[.]")[this.way.split("[.]").length - 1];
-                }
-                result = this.basicObj.getString(this.way);
+                } 
+                    result = this.basicObj.getString(this.way);
             }
             if (this.callback != null) {
                 CallbackData generatorParams = new CallbackData(this.path, result);
@@ -313,6 +313,6 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
         if (!(value instanceof BasicDBObject)) {
             return false;
         }
-        return ((BasicDBObject)value).containsField("collection") && ((BasicDBObject)value).containsField("path");
+        return ((BasicDBObject) value).containsField("collection") && ((BasicDBObject) value).containsField("path");
     }
 }
