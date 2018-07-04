@@ -247,8 +247,8 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
             if (result == null) {
                 if (this.way.contains(".")) {
                     this.way = this.way.split("[.]")[this.way.split("[.]").length - 1];
-                }
-                result = this.basicObj.getString(this.way);
+                } 
+                    result = this.basicObj.getString(this.way);
             }
             if (this.callback != null) {
                 CallbackData generatorParams = new CallbackData(this.path, result);
@@ -305,5 +305,14 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
             throw new CollectionNotfoundException(String.format("File %s.json not found in %s",
                     collectionName, testDataFolder), ex);
         }
+    }
+
+    @Override
+    public boolean isReference() throws DataException {
+        Object value = this.basicObj.get("value");
+        if (!(value instanceof BasicDBObject)) {
+            return false;
+        }
+        return ((BasicDBObject) value).containsField("collection") && ((BasicDBObject) value).containsField("path");
     }
 }

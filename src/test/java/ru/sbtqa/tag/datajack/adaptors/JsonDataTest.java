@@ -103,6 +103,15 @@ public class JsonDataTest {
     }
 
     @Test
+    public void isReferenceTest() throws DataException {
+        String collectionName = "DataBlocks";
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, collectionName);
+
+        assertTrue("This isn't reference",
+                tdo.get("Common.password2").isReference());
+    }
+
+    @Test
     public void valuePathTest() throws DataException {
         String collectionName = "DataBlocks";
         TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, collectionName);
@@ -225,12 +234,12 @@ public class JsonDataTest {
     @Test
     public void getRefAsObject() throws DataException {
         TestDataObject originalTdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, "DataBlocks");
-        originalTdo.get("Common");
+        String original = originalTdo.get("Common").toString();
 
         TestDataObject referencedTdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, "Tests");
-        referencedTdo.get("Common.ref object data").getReference();
+        String referenced = referencedTdo.get("Common.ref object data").getReference().toString();
 
-        assertEquals(originalTdo.toString(), referencedTdo.toString());
+        assertEquals(original, referenced);
     }
 
     @Test
