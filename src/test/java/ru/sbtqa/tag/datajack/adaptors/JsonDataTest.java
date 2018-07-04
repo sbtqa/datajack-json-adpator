@@ -297,6 +297,7 @@ public class JsonDataTest {
         while (resultIterator.hasNext()) {
             Object currentResValue = resultIterator.next();
             Object currentOrigValue = originalIterator.next();
+
             if (!(currentOrigValue instanceof BasicDBObject)) {
                 assertEquals("Unexpected value transformation", currentOrigValue.toString(), currentResValue.toString());
             }
