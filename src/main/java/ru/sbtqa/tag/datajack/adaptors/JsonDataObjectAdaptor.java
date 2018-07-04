@@ -51,7 +51,7 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
      *
      * @param testDataFolder path to data folder
      * @param collectionName json file name
-     * @param extension Custom file extension
+     * @param extension custom file extension
      * @throws DataException if file not found in testDataFolder
      */
     public JsonDataObjectAdaptor(String testDataFolder, String collectionName, String extension) throws DataException {
@@ -68,9 +68,10 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
     /**
      * Internal use only for adaptor overriding purposes
      *
-     * @param testDataFolder
-     * @param obj
-     * @param collectionName
+     * @param testDataFolder path to data folder
+     * @param obj basic object
+     * @param collectionName file name
+     * @param extension custom file extension
      */
     protected JsonDataObjectAdaptor(String testDataFolder, BasicDBObject obj, String collectionName, String extension) {
         this.extension = extension;
@@ -82,10 +83,11 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
     /**
      * Internal use only for adaptor overriding purposes
      *
-     * @param testDataFolder
-     * @param obj
-     * @param collectionName
-     * @param way
+     * @param testDataFolder path to data folder
+     * @param obj basic object
+     * @param collectionName file name
+     * @param way complex path to value
+     * @param extension custom file extension
      */
     protected JsonDataObjectAdaptor(String testDataFolder, BasicDBObject obj, String collectionName, String way, String extension) {
         this.extension = extension;
@@ -98,11 +100,11 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
     /**
      * Internal use only for adaptor overriding purposes
      *
-     * @param <T>
-     * @param testDataFolder
-     * @param obj
-     * @param collectionName
-     * @param way
+     * @param <T> Overrider type
+     * @param testDataFolder path to data folder
+     * @param obj Basic object
+     * @param collectionName file name
+     * @param way complex path to value
      * @return
      */
     protected <T extends JsonDataObjectAdaptor> T privateInit(String testDataFolder, BasicDBObject obj, String collectionName, String way) {
@@ -112,10 +114,10 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
     /**
      * Internal use only for adaptor overriding purposes
      *
-     * @param <T>
-     * @param testDataFolder
-     * @param obj
-     * @param collectionName
+     * @param <T> Overrider type
+     * @param testDataFolder path to data folder
+     * @param obj basic object
+     * @param collectionName file name
      * @return
      */
     protected <T extends JsonDataObjectAdaptor> T privateInit(String testDataFolder, BasicDBObject obj, String collectionName) {
