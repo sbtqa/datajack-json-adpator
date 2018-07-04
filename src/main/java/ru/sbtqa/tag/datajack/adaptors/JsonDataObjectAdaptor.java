@@ -51,7 +51,7 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
      *
      * @param testDataFolder path to data folder
      * @param collectionName json file name
-     * @param extension
+     * @param extension Custom file extension
      * @throws DataException if file not found in testDataFolder
      */
     public JsonDataObjectAdaptor(String testDataFolder, String collectionName, String extension) throws DataException {
