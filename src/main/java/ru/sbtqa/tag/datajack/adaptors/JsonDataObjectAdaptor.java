@@ -1,5 +1,6 @@
 package ru.sbtqa.tag.datajack.adaptors;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import static com.mongodb.BasicDBObject.parse;
 import java.io.File;
@@ -23,8 +24,10 @@ import ru.sbtqa.tag.datajack.exceptions.ReferenceException;
 public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements TestDataObject {
 
     private static final Logger LOG = LoggerFactory.getLogger(JsonDataObjectAdaptor.class);
-    private final String collectionName;
-    private final String testDataFolder;
+    private static final String DEFAULT_EXTENSION = "json";
+    protected String collectionName;
+    protected String testDataFolder;
+    protected String extension;
 
     /**
      * Create JsonDataObjectAdaptor instance
@@ -34,82 +37,126 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
      * @throws DataException if file not found in testDataFolder
      */
     public JsonDataObjectAdaptor(String testDataFolder, String collectionName) throws DataException {
-        String json;
-        try {
-            json = readFileToString(new File(testDataFolder + separator + collectionName + ".json"), "UTF-8");
-        } catch (IOException ex) {
-            throw new CollectionNotfoundException(String.format("File %s.json not found in %s",
-                    collectionName, testDataFolder), ex);
-        }
+        this.extension = DEFAULT_EXTENSION;
+        String json = readFile(testDataFolder, collectionName);
+
         BasicDBObject parsed = parse(json);
         this.testDataFolder = testDataFolder;
         this.basicObj = parsed;
         this.collectionName = collectionName;
     }
 
-    private JsonDataObjectAdaptor(String testDataFolder, BasicDBObject obj, String collectionName) {
+    /**
+     * Create JsonDataObjectAdaptor instance
+     *
+     * @param testDataFolder path to data folder
+     * @param collectionName json file name
+     * @param extension custom file extension
+     * @throws DataException if file not found in testDataFolder
+     */
+    public JsonDataObjectAdaptor(String testDataFolder, String collectionName, String extension) throws DataException {
+        this.extension = extension;
+
+        String json = readFile(testDataFolder, collectionName);
+
+        BasicDBObject parsed = parse(json);
+        this.testDataFolder = testDataFolder;
+        this.basicObj = parsed;
+        this.collectionName = collectionName;
+    }
+
+    /**
+     * Internal use only for adaptor overriding purposes
+     *
+     * @param testDataFolder path to data folder
+     * @param obj basic object
+     * @param collectionName file name
+     * @param extension custom file extension
+     */
+    protected JsonDataObjectAdaptor(String testDataFolder, BasicDBObject obj, String collectionName, String extension) {
+        this.extension = extension;
         this.testDataFolder = testDataFolder;
         this.basicObj = obj;
         this.collectionName = collectionName;
     }
 
-    private JsonDataObjectAdaptor(String testDataFolder, BasicDBObject obj, String collectionName, String way) {
+    /**
+     * Internal use only for adaptor overriding purposes
+     *
+     * @param testDataFolder path to data folder
+     * @param obj basic object
+     * @param collectionName file name
+     * @param way complex path to value
+     * @param extension custom file extension
+     */
+    protected JsonDataObjectAdaptor(String testDataFolder, BasicDBObject obj, String collectionName, String way, String extension) {
+        this.extension = extension;
         this.testDataFolder = testDataFolder;
         this.basicObj = obj;
         this.way = way;
         this.collectionName = collectionName;
     }
 
+    /**
+     * Internal use only for adaptor overriding purposes
+     *
+     * @param <T> Overrider type
+     * @param testDataFolder path to data folder
+     * @param obj Basic object
+     * @param collectionName file name
+     * @param way complex path to value
+     * @return
+     */
+    protected <T extends JsonDataObjectAdaptor> T privateInit(String testDataFolder, BasicDBObject obj, String collectionName, String way) {
+        return (T) new JsonDataObjectAdaptor(testDataFolder, obj, collectionName, way, extension);
+    }
+
+    /**
+     * Internal use only for adaptor overriding purposes
+     *
+     * @param <T> Overrider type
+     * @param testDataFolder path to data folder
+     * @param obj basic object
+     * @param collectionName file name
+     * @return
+     */
+    protected <T extends JsonDataObjectAdaptor> T privateInit(String testDataFolder, BasicDBObject obj, String collectionName) {
+        return (T) new JsonDataObjectAdaptor(testDataFolder, obj, collectionName, extension);
+    }
+
     @Override
     public JsonDataObjectAdaptor fromCollection(String collName) throws DataException {
-        try {
-            String json = readFileToString(new File(this.testDataFolder + separator + collName + ".json"), "UTF-8");
-            BasicDBObject parsed = parse(json);
-            JsonDataObjectAdaptor newObj = new JsonDataObjectAdaptor(this.testDataFolder, parsed, collName);
-            newObj.applyGenerator(this.callback);
-            return newObj;
-        } catch (IOException ex) {
-            throw new CyclicReferencesExeption("There is no file with " + collName + ".json name", ex);
-        }
-
+        String json = readFile(this.testDataFolder, collName);
+        BasicDBObject parsed = parse(json);
+        JsonDataObjectAdaptor newObj = privateInit(this.testDataFolder, parsed, collName);
+        newObj.applyGenerator(this.callback);
+        return newObj;
     }
 
     @Override
     public TestDataObject get(String key) throws DataException {
         this.way = key;
-        JsonDataObjectAdaptor tdo;
+        return key.contains(".") ? getComplex(key) : getSimple(key);
 
-        if (key.contains(".")) {
-            String[] keys = key.split("[.]");
-            StringBuilder partialBuilt = new StringBuilder();
-            BasicDBObject basicO = this.basicObj;
-            for (String partialKey : keys) {
-                partialBuilt.append(partialKey);
-                if (!(basicO.get(partialKey) instanceof BasicDBObject)) {
-                    if (null == basicO.get(partialKey)) {
-                        throw new FieldNotFoundException(format("Collection \"%s\" doesn't contain \"%s\" field on path \"%s\"",
-                                this.collectionName, partialKey, partialBuilt.toString()));
-                    }
-                    break;
-                }
-                basicO = (BasicDBObject) basicO.get(partialKey);
-                partialBuilt.append(".");
+    }
+
+    private TestDataObject getSimple(String key) throws FieldNotFoundException, DataException {
+        Object result;
+
+        if (isArray(key)) {
+            result = parseArray(basicObj, key);
+        } else {
+
+            if (!basicObj.containsField(key)) {
+                throw new FieldNotFoundException(format("Collection \"%s\" doesn't contain \"%s\" field in path \"%s\"",
+                        this.collectionName, key, this.path));
             }
-
-            tdo = new JsonDataObjectAdaptor(this.testDataFolder, basicO, this.collectionName, this.way);
-            tdo.applyGenerator(this.callback);
-            tdo.setRootObj(this.rootObj, this.collectionName + "." + key);
-            return tdo;
+            result = this.basicObj.get(key);
         }
-        if (!basicObj.containsField(key)) {
-            throw new FieldNotFoundException(format("Collection \"%s\" doesn't contain \"%s\" field in path \"%s\"",
-                    this.collectionName, key, this.path));
-        }
-        Object result = this.basicObj.get(key);
         if (!(result instanceof BasicDBObject)) {
             result = new BasicDBObject(key, result);
         }
-        tdo = new JsonDataObjectAdaptor(this.testDataFolder, (BasicDBObject) result, this.collectionName, this.way);
+        JsonDataObjectAdaptor tdo = privateInit(this.testDataFolder, (BasicDBObject) result, this.collectionName, this.way);
         tdo.applyGenerator(this.callback);
 
         String rootObjValue;
@@ -120,6 +167,61 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
         }
         tdo.setRootObj(this.rootObj, rootObjValue);
         return tdo;
+    }
+
+    private TestDataObject getComplex(String key) throws FieldNotFoundException, DataException {
+
+        JsonDataObjectAdaptor tdo = privateInit(this.testDataFolder, parseComplexDBObject(key), this.collectionName, this.way);
+        tdo.applyGenerator(this.callback);
+        tdo.setRootObj(this.rootObj, this.collectionName + "." + key);
+
+        return tdo;
+    }
+
+    private BasicDBObject parseComplexDBObject(String key) throws DataException {
+        String[] keys = key.split("[.]");
+        StringBuilder partialBuilt = new StringBuilder();
+        BasicDBObject basicObject = this.basicObj;
+
+        for (String partialKey : keys) {
+            partialBuilt.append(partialKey);
+
+            if (isArray(partialKey)) {
+                basicObject = (BasicDBObject) parseArray(basicObject, partialKey);
+                continue;
+            }
+
+            if (!(basicObject.get(partialKey) instanceof BasicDBObject)) {
+                if (null == basicObject.get(partialKey)) {
+                    throw new FieldNotFoundException(format("Collection \"%s\" doesn't contain \"%s\" field on path \"%s\"",
+                            this.collectionName, partialKey, partialBuilt.toString()));
+                }
+                break;
+            }
+
+            basicObject = (BasicDBObject) basicObject.get(partialKey);
+            partialBuilt.append(".");
+        }
+        return basicObject;
+    }
+
+    private Object parseArray(BasicDBObject basicO, String key) throws DataException {
+        if (!isArray(key)) {
+            throw new DataException(String.format("%s.%s is not an array!", this.collectionName, key));
+        }
+        String arrayKey = key.split("\\[")[0];
+        String arrayIndex = key.split("\\[")[1].split("\\]")[0];
+        Object listCandidate = basicO.get(arrayKey);
+
+        if (!(listCandidate instanceof BasicDBList)) {
+            throw new DataException(String.format("%s.%s is not an array!", this.collectionName, key));
+        }
+
+        return ((BasicDBList) listCandidate).get(arrayIndex);
+    }
+
+    public static boolean isArray(String key) {
+        return key.matches("(.+\\[\\d+\\])");
     }
 
     @Override
@@ -194,5 +296,14 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
     @Override
     public void applyGenerator(Class<? extends GeneratorCallback> callback) {
         this.callback = callback;
+    }
+
+    protected String readFile(String testDataFolder, String collectionName) throws CollectionNotfoundException {
+        try {
+            return readFileToString(new File(testDataFolder + separator + collectionName + "." + this.extension), "UTF-8");
+        } catch (IOException ex) {
+            throw new CollectionNotfoundException(String.format("File %s.json not found in %s",
+                    collectionName, testDataFolder), ex);
+        }
     }
 }
