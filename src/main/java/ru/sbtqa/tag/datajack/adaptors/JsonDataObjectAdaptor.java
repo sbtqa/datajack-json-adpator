@@ -134,11 +134,11 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
     @Override
     public TestDataObject get(String key) throws DataException {
         this.way = key;
-        return key.contains(".") ? parseComplex(key) : parseSimple(key);
+        return key.contains(".") ? getComplex(key) : getSimple(key);
 
     }
 
-    private TestDataObject parseSimple(String key) throws FieldNotFoundException, DataException {
+    private TestDataObject getSimple(String key) throws FieldNotFoundException, DataException {
         Object result;
 
         if (isArray(key)) {
@@ -167,32 +167,40 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
         return tdo;
     }
 
-    private TestDataObject parseComplex(String key) throws FieldNotFoundException, DataException {
+    private TestDataObject getComplex(String key) throws FieldNotFoundException, DataException {
+
+        JsonDataObjectAdaptor tdo = privateInit(this.testDataFolder, parseComplexDBObject(key), this.collectionName, this.way);
+        tdo.applyGenerator(this.callback);
+        tdo.setRootObj(this.rootObj, this.collectionName + "." + key);
+
+        return tdo;
+    }
+
+    private BasicDBObject parseComplexDBObject(String key) throws DataException {
         String[] keys = key.split("[.]");
         StringBuilder partialBuilt = new StringBuilder();
-        BasicDBObject basicO = this.basicObj;
+        BasicDBObject basicObject = this.basicObj;
+
         for (String partialKey : keys) {
             partialBuilt.append(partialKey);
 
             if (isArray(partialKey)) {
-                basicO = (BasicDBObject) parseArray(basicO, partialKey);
+                basicObject = (BasicDBObject) parseArray(basicObject, partialKey);
                 continue;
             }
 
-            if (!(basicO.get(partialKey) instanceof BasicDBObject)) {
-                if (null == basicO.get(partialKey)) {
+            if (!(basicObject.get(partialKey) instanceof BasicDBObject)) {
+                if (null == basicObject.get(partialKey)) {
                     throw new FieldNotFoundException(format("Collection \"%s\" doesn't contain \"%s\" field on path \"%s\"",
                             this.collectionName, partialKey, partialBuilt.toString()));
                 }
                 break;
             }
-            basicO = (BasicDBObject) basicO.get(partialKey);
+
+            basicObject = (BasicDBObject) basicObject.get(partialKey);
             partialBuilt.append(".");
         }
-        JsonDataObjectAdaptor tdo = privateInit(this.testDataFolder, basicO, this.collectionName, this.way);
-        tdo.applyGenerator(this.callback);
-        tdo.setRootObj(this.rootObj, this.collectionName + "." + key);
-        return tdo;
+        return basicObject;
     }
 
     private Object parseArray(BasicDBObject basicO, String key) throws DataException {
