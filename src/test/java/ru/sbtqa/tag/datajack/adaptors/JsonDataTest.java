@@ -101,6 +101,15 @@ public class JsonDataTest {
         assertEquals("123qwe",
                 tdo.get("Common.password2").getValue());
     }
+    
+    @Test
+    public void isReferenceTest() throws DataException {
+        String collectionName = "DataBlocks";
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, collectionName);
+
+        assertTrue("This isn't reference",
+                tdo.get("Common.password2").isReference());
+    }
 
     @Test
     public void valuePathTest() throws DataException {

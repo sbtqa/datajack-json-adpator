@@ -306,4 +306,13 @@ public class JsonDataObjectAdaptor extends AbstractDataObjectAdaptor implements 
                     collectionName, testDataFolder), ex);
         }
     }
+
+    @Override
+    public boolean isReference() throws DataException {
+        Object value = this.basicObj.get("value");
+        if (!(value instanceof BasicDBObject)) {
+            return false;
+        }
+        return ((BasicDBObject)value).containsField("collection") && ((BasicDBObject)value).containsField("path");
+    }
 }
