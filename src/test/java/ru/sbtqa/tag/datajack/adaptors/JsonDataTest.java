@@ -26,7 +26,7 @@ import static java.lang.String.format;
 
 public class JsonDataTest {
 
-    private static final String jsonDataPath = "src/test/resources/json";
+    private static final String JSON_DATA_PATH = "src/test/resources/json";
 
     @Before
     public void setUp() {
@@ -39,7 +39,7 @@ public class JsonDataTest {
     @Test
     public void differentExtensionTest() throws DataException {
         String collectionName = "JsonP";
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collectionName, "jsonp");
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, collectionName, "jsonp");
 
         assertEquals("123qwe",
                 tdo.get("Common.password2").getValue());
@@ -48,7 +48,7 @@ public class JsonDataTest {
     @Test
     public void simpleArrayTest() throws DataException {
         String collectionName = "Tests";
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collectionName);
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, collectionName);
 
         assertEquals("a",
                 tdo.get("array[0]").getValue());
@@ -57,7 +57,7 @@ public class JsonDataTest {
     @Test
     public void arrayTest() throws DataException {
         String collectionName = "Tests";
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collectionName);
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, collectionName);
 
         assertEquals("1",
                 tdo.get("array[1].b").getValue());
@@ -66,7 +66,7 @@ public class JsonDataTest {
     @Test
     public void deepArrayTest() throws DataException {
         String collectionName = "Tests";
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collectionName);
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, collectionName);
 
         assertEquals("1",
                 tdo.get("array[2].b[0].b.c").getValue());
@@ -75,7 +75,7 @@ public class JsonDataTest {
     @Test
     public void arrayReferenceTest() throws DataException {
         String collectionName = "Tests";
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collectionName);
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, collectionName);
 
         assertEquals("123qwe",
                 tdo.get("array[3].ref").getValue());
@@ -84,7 +84,7 @@ public class JsonDataTest {
     @Test
     public void arrayGeneratorTest() throws DataException {
         String collectionName = "Tests";
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collectionName);
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, collectionName);
         tdo.applyGenerator(SampleDataGensCallback.class);
 
         String genGenOrgigin = tdo.get("Common.gen gen.gendata").getValue();
@@ -96,7 +96,7 @@ public class JsonDataTest {
     @Test
     public void getReferenceTest() throws DataException {
         String collectionName = "DataBlocks";
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collectionName);
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, collectionName);
 
         assertEquals("123qwe",
                 tdo.get("Common.password2").getValue());
@@ -105,7 +105,7 @@ public class JsonDataTest {
     @Test
     public void valuePathTest() throws DataException {
         String collectionName = "DataBlocks";
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collectionName);
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, collectionName);
 
         assertEquals("Params Group 1.password",
                 tdo.get("Common").get("password2.value.path").getValue());
@@ -114,7 +114,7 @@ public class JsonDataTest {
     @Test
     public void getFromAnotherCollectionTest() throws DataException {
         String collectionName = "DataBlocks";
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collectionName);
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, collectionName);
 
         assertEquals("123",
                 tdo.fromCollection("Tests").
@@ -124,7 +124,7 @@ public class JsonDataTest {
     @Test
     public void getNotValuedValueTest() throws DataException {
         String collectionName = "DataBlocks";
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collectionName);
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, collectionName);
 
         assertEquals("20.91",
                 tdo.get("Common.price").getValue());
@@ -133,7 +133,7 @@ public class JsonDataTest {
     @Test
     public void failWithWrongPath() throws DataException {
         String collectionName = "DataBlocks";
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collectionName);
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, collectionName);
         String wrongPath = "Common.password.paww";
 
         expectDataExceptions
@@ -148,7 +148,7 @@ public class JsonDataTest {
     @Test
     public void failWithWrongGetGetPath() throws DataException {
         String collection = "DataBlocks";
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collection);
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, collection);
 
         expectDataExceptions
                 .expect(FieldNotFoundException.class);
@@ -163,7 +163,7 @@ public class JsonDataTest {
         String collectionName = "DataBlocks";
         String cyclicPath = "Common.cyclic";
 
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collectionName);
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, collectionName);
 
         String cyclicObject = format("{ \"value\" : { \"collection\" : \"%s\", "
                 + "\"path\" : \"Common.cyclic\" }, \"comment\" : \"Cyclic\"", collectionName);
@@ -179,7 +179,7 @@ public class JsonDataTest {
     public void genDataSameCollectionTest() throws DataException {
         String collectionName = "DataBlocks";
 
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collectionName);
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, collectionName);
         tdo.applyGenerator(SampleDataGensCallback.class);
 
         String genGenOrgigin = tdo.get("Common.gen gen.gendata").getValue();
@@ -195,7 +195,7 @@ public class JsonDataTest {
     public void genDataDifferentCollections() throws DataException {
         String collectionName = "Tests";
 
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collectionName);
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, collectionName);
         tdo.applyGenerator(SampleDataGensCallback.class);
 
         String genGenOrgigin = tdo.get("Common.gendata").getValue();
@@ -209,7 +209,7 @@ public class JsonDataTest {
     public void genDataDifferentCollectionsReference() throws DataException {
         String collectionName = "DataBlocks";
 
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collectionName);
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, collectionName);
         tdo.applyGenerator(SampleDataGensCallback.class);
 
         String genGenOrgigin = tdo.get("Common.gen gen.gendata").getValue();
@@ -224,10 +224,10 @@ public class JsonDataTest {
 
     @Test
     public void getRefAsObject() throws DataException {
-        TestDataObject originalTdo = new JsonDataObjectAdaptor(this.jsonDataPath, "DataBlocks");
+        TestDataObject originalTdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, "DataBlocks");
         originalTdo.get("Common");
 
-        TestDataObject referencedTdo = new JsonDataObjectAdaptor(this.jsonDataPath, "Tests");
+        TestDataObject referencedTdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, "Tests");
         referencedTdo.get("Common.ref object data").getReference();
 
         assertEquals(originalTdo.toString(), referencedTdo.toString());
@@ -238,7 +238,7 @@ public class JsonDataTest {
         String collection = "DataBlocks";
         String path = "testId";
 
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, collection);
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, collection);
 
         expectDataExceptions.expect(ReferenceException.class);
         expectDataExceptions.expectMessage(String.format("There is no reference in \"%s.%s\". Collection \"%s\"",
@@ -249,7 +249,7 @@ public class JsonDataTest {
 
     @Test
     public void toMapTest() throws DataException {
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, "DataBlocks");
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, "DataBlocks");
         Object supposedToBeMap = tdo.toMap();
 
         assertTrue("Type of return value toMap() is not Map", supposedToBeMap instanceof Map);
@@ -259,7 +259,7 @@ public class JsonDataTest {
 
     @Test
     public void getKeySetTest() throws DataException {
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, "DataBlocks");
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, "DataBlocks");
         Object supposedToBeSet = tdo.getKeySet();
 
         assertTrue("Type of return value getKeySet() is not Set", supposedToBeSet instanceof Set);
@@ -269,7 +269,7 @@ public class JsonDataTest {
 
     @Test
     public void getValuesTest() throws DataException {
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, "DataBlocks");
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, "DataBlocks");
         Object rawValues = tdo.getValues();
 
         assertTrue("Type of return value getValues() is not Collection", rawValues instanceof Collection);
@@ -279,7 +279,7 @@ public class JsonDataTest {
 
     @Test
     public void getStringValuesTest() throws DataException {
-        TestDataObject tdo = new JsonDataObjectAdaptor(this.jsonDataPath, "DataBlocks").get("MapTests");
+        TestDataObject tdo = new JsonDataObjectAdaptor(JSON_DATA_PATH, "DataBlocks").get("MapTests");
         Object stringValues = tdo.getStringValues();
 
         assertTrue("Type of return value getStringValues() is not List", stringValues instanceof List);
