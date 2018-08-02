@@ -1,10 +1,11 @@
-package ru.sbtqa.tag.datajack.adaptors;
+package ru.sbtqa.tag.datajack.adaptors.json;
 
 import com.mongodb.BasicDBObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import ru.sbtqa.tag.datajack.adaptors.json.JsonDataObjectAdaptor;
 import ru.sbtqa.tag.datajack.callback.SampleDataGensCallback;
 import ru.sbtqa.tag.datajack.TestDataObject;
 import ru.sbtqa.tag.datajack.exceptions.CyclicReferencesExeption;
