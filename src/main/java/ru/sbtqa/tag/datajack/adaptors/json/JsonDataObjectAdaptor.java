@@ -1,4 +1,4 @@
-package ru.sbtqa.tag.datajack.adaptors;
+package ru.sbtqa.tag.datajack.adaptors.json;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -12,6 +12,7 @@ import org.bson.BasicBSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.sbtqa.tag.datajack.TestDataObject;
+import ru.sbtqa.tag.datajack.adaptors.AbstractDataObjectAdaptor;
 import ru.sbtqa.tag.datajack.callback.CallbackData;
 import ru.sbtqa.tag.datajack.callback.GeneratorCallback;
 import ru.sbtqa.tag.datajack.exceptions.CollectionNotfoundException;
