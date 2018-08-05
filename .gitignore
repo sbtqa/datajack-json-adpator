@@ -9,3 +9,7 @@ buildNumber.properties
 .mvn/timing.properties
 .idea/
 datajack-json-adaptor.iml
+.classpath
+.project
+.settings/
+.vscode/
